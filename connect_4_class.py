@@ -4,7 +4,7 @@ import sys
 import math
 
 class Connect4:
-    def __init__(self, render_delay_sec=0.5):
+    def __init__(self):
         # constants
         self.num_rows = 6
         self.num_columns = 7
@@ -101,6 +101,7 @@ class Connect4:
                     return True
         return False
 
+    # figure out how to customize player vs player or player vs AI
     def main_game(self):
         while not self.game_over:
             for event in pygame.event.get():
@@ -132,11 +133,11 @@ class Connect4:
                             self.screen.blit(winning_label, (40, 10))
                             self.game_over = True
 
-                    # print_board(board)
                     self.draw_board()
                     self.turn += 1
                     self.turn = self.turn % 2
 
+                    # introduce a main menu
                     if self.game_over:
                         pygame.time.wait(3000)
 
