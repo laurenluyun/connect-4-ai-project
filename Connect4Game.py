@@ -135,44 +135,39 @@ class Connect4Game:
 
     def start_game(self):
         while not self.game_over:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+            # If it's AI's turn, make the move automatically
+            if self.game_mode == "PvAI" and self.turn == 1 and not self.game_over:
+                pygame.time.wait(500)  # Add a slight delay for realism
+                self.ai_move()
+                self.turn = 0  # Switch back to player
+                self.draw_board()
+                if self.game_over:
+                    pygame.time.wait(4000)
 
-                # refresh the black bar
-                if event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
-                    x_position = event.pos[0]
-                    if self.turn == 0:
-                        pygame.draw.circle(self.screen, self.red, (x_position, int(self.square_size / 2)), self.circle_radius)
-                    else:
-                        pygame.draw.circle(self.screen, self.yellow, (x_position, int(self.square_size / 2)), self.circle_radius)
-                pygame.display.update()
+            else:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
-                    x_position = event.pos[0]
+                    # Make sure the piece follows the mouse even during AI turn
+                    if event.type == pygame.MOUSEMOTION:
+                        pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
+                        x_position = event.pos[0]
+                        if self.turn == 0:  # Player1's turn
+                            pygame.draw.circle(self.screen, self.red, (x_position, int(self.square_size / 2)), self.circle_radius)
+                        else:  # another player's turn
+                            pygame.draw.circle(self.screen, self.yellow, (x_position, int(self.square_size / 2)), self.circle_radius)
+                    pygame.display.update()
 
-                    # PvAI
-                    if self.game_mode == "PvAI":
-                        # user play
-                        if self.turn == 0:
-                            col = int(math.floor(x_position / self.square_size))
-                            if self.make_move(col, self.PLAYER_PIECE):
-                                self.turn = 1
-                        else:
-                            self.ai_move()
-                            self.turn = 0
-                    else:  # PvP Mode
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
+                        x_position = event.pos[0]
                         col = int(math.floor(x_position / self.square_size))
                         if self.make_move(col, self.turn + 1):
                             self.turn = 1 - self.turn  # Switch player
-
-                    self.draw_board()
-
-                    # introduce a main menu
-                    if self.game_over:
-                        pygame.time.wait(4000)
+                        self.draw_board()
+                        if self.game_over:
+                            pygame.time.wait(4000)
 
 
 # Start the game
