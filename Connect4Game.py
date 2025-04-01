@@ -18,10 +18,13 @@ class Connect4Game:
         self.circle_radius = int(self.square_size / 2 - 5)
 
         # color definitions
+        self.pink = (255, 0, 239)
+        self.orange = (255, 145, 0)
+        self.white = (255, 255, 255)
+        self.gray = (196, 196, 196)
+
         self.blue = (0, 0, 255)
         self.black = (0, 0, 0)
-        self.red = (255, 0, 0)
-        self.yellow = (255, 255, 0)
 
         self.game_over = False
         self.turn = random.choice([0, 1])
@@ -74,19 +77,19 @@ class Connect4Game:
     def draw_grid(self):
         for column in range(self.num_columns):
             for row in range(self.num_rows):
-                pygame.draw.rect(self.screen, self.blue,(column * self.square_size, (row + 1) * self.square_size,
+                pygame.draw.rect(self.screen, self.gray,(column * self.square_size, (row + 1) * self.square_size,
                                                     self.square_size, self.square_size))
-                pygame.draw.circle(self.screen, self.black,(int((column + 0.5) * self.square_size),
+                pygame.draw.circle(self.screen, self.white,(int((column + 0.5) * self.square_size),
                                                        int((row + 1.5) * self.square_size)), self.circle_radius)
 
     def draw_pieces(self):
         for column in range(self.num_columns):
             for row in range(self.num_rows):
                 if self.board[row][column] == 1:
-                    pygame.draw.circle(self.screen, self.red, (int((column + 0.5) * self.square_size),
+                    pygame.draw.circle(self.screen, self.pink, (int((column + 0.5) * self.square_size),
                                                           self.screen_height - int((row + 0.5) * self.square_size)), self.circle_radius)
                 elif self.board[row][column] == 2:
-                    pygame.draw.circle(self.screen, self.yellow, (int((column + 0.5) * self.square_size),
+                    pygame.draw.circle(self.screen, self.orange, (int((column + 0.5) * self.square_size),
                                                              self.screen_height - int((row + 0.5) * self.square_size)),self.circle_radius)
 
     def draw_board(self):
@@ -106,9 +109,9 @@ class Connect4Game:
             if self.ai.check_win(self.board, piece, self.num_columns, self.num_rows):
                 self.game_over = True
                 if piece == self.PLAYER_PIECE:
-                    winning_label = self.screen_font.render(f"Player 1 wins!", 1, self.red)
+                    winning_label = self.screen_font.render(f"Player 1 wins!", 1, self.pink)
                 else:
-                    winning_label = self.screen_font.render(f"Player 2 wins!", 1, self.yellow)
+                    winning_label = self.screen_font.render(f"Player 2 wins!", 1, self.orange)
                 self.screen.blit(winning_label, (40, 10))
             return True
         return False
@@ -140,16 +143,16 @@ class Connect4Game:
 
                     # Make sure the piece follows the mouse even during AI turn
                     if event.type == pygame.MOUSEMOTION:
-                        pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
+                        pygame.draw.rect(self.screen, self.white, (0, 0, self.screen_width, self.square_size))
                         x_position = event.pos[0]
                         if self.turn == 0:  # Player1's turn
-                            pygame.draw.circle(self.screen, self.red, (x_position, int(self.square_size / 2)), self.circle_radius)
+                            pygame.draw.circle(self.screen, self.pink, (x_position, int(self.square_size / 2)), self.circle_radius)
                         else:  # another player's turn
-                            pygame.draw.circle(self.screen, self.yellow, (x_position, int(self.square_size / 2)), self.circle_radius)
+                            pygame.draw.circle(self.screen, self.orange, (x_position, int(self.square_size / 2)), self.circle_radius)
                     pygame.display.update()
 
                     if event.type == pygame.MOUSEBUTTONDOWN:
-                        pygame.draw.rect(self.screen, self.black, (0, 0, self.screen_width, self.square_size))
+                        pygame.draw.rect(self.screen, self.white, (0, 0, self.screen_width, self.square_size))
                         x_position = event.pos[0]
                         col = int(math.floor(x_position / self.square_size))
                         if self.make_move(col, self.turn + 1):
