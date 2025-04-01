@@ -115,10 +115,10 @@ while not game_over:
                     screen.blit(winning_label, (40,10))
                     game_over = True
 
-            # print_board(board)
-            draw_board(board)
-            turn += 1
-            turn = turn % 2
+                # print_board(board)
+                draw_board(board)
+                turn += 1
+                turn = turn % 2
 
             if game_over:
                 pygame.time.wait(3000)
