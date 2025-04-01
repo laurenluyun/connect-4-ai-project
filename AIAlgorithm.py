@@ -1,5 +1,7 @@
 import random
 import math
+import numpy as np
+import copy
 
 
 class AIAlgorithm:
@@ -10,6 +12,8 @@ class AIAlgorithm:
         self.PLAYER_PIECE = player_piece
         # Empty slot identifier in the board
         self.EMPTY = 0
+        self.num_rows = 6
+        self.num_columns = 7
 
     def is_valid_location(self, board, col):
         # A column is valid if the top row (row index 5) is empty
@@ -40,7 +44,7 @@ class AIAlgorithm:
             for col in valid_locations:
                 # find the available row
                 row = next(r for r in range(6) if board[r][col] == 0)
-                temp_board = board.copy()
+                temp_board = copy.deepcopy(board)
                 # simulate the move
                 self.drop_piece(temp_board, row, col, self.AI_PIECE)
                 # recursively call minimax with the next move from player1
@@ -57,7 +61,7 @@ class AIAlgorithm:
             value, best_col = math.inf, random.choice(valid_locations)
             for col in valid_locations:
                 row = next(r for r in range(6) if board[r][col] == 0)
-                temp_board = board.copy()
+                temp_board = copy.deepcopy(board)
                 self.drop_piece(temp_board, row, col, self.PLAYER_PIECE)
                 new_score = self.minimax(temp_board, depth - 1, alpha, beta, True)[1]
                 if new_score < value:
@@ -66,3 +70,85 @@ class AIAlgorithm:
                 if alpha >= beta:
                     break
             return best_col, value
+
+    def monte_carlo_tree_search(self, board, simulations=1000):
+        '''
+        MCTS for AI decision-making in hard mode, simulating 'simulations' number of random games
+        for each valid move. The move with the highest win count for AI is chosen
+        :param board:
+        :param simulations:
+        :return: the best column to play based on MCTS simulation results
+        '''
+        valid_moves = self.get_valid_locations(board)
+        move_scores = {col: 0 for col in valid_moves}
+
+        # run simulations for each valid move
+        for col in valid_moves:
+            for _ in range(simulations):
+                sim_board = copy.deepcopy(board)
+                row = next(r for r in range(6) if sim_board[r][col] == 0)
+                self.drop_piece(sim_board, row, col, self.AI_PIECE)
+                # simulate a random game from this position
+                if self.simulate_random_game(sim_board):
+                    move_scores[col] += 1
+        # return the column with the highest simulation win rate
+        return max(move_scores, key=move_scores.get)
+
+    def simulate_random_game(self, board):
+        '''
+        Simulates a complete game from a given board state using random moves.
+        - Players take turns making random valid moves.
+        - The game continues until a winner is found or no moves are left.
+        :param board:
+        :return: True if AI wins, False otherwise
+        '''
+        # start with the opponent's turn
+        current_piece = self.PLAYER_PIECE
+        while True:
+            valid_moves = self.get_valid_locations(board)
+            if not valid_moves:
+                return False
+
+            # select a random valid move
+            col = random.choice(valid_moves)
+            row = next(r for r in range(6) if board[r][col] == 0)
+            self.drop_piece(board, row, col, current_piece)
+
+            # check if the current move results in a win
+            if self.check_win(board, current_piece, self.num_columns, self.num_rows):
+                # return True if AI wins
+                return current_piece == self.AI_PIECE
+
+            # switch turns between AI and player
+            current_piece = self.PLAYER_PIECE if current_piece == self.AI_PIECE else self.AI_PIECE
+
+    def check_win(self, board, piece, num_columns, num_rows):
+        # check horizontal locations for win
+        for column in range(num_columns - 3):
+            for row in range(num_rows):
+                if (board[row][column] == piece and board[row][column + 1] == piece
+                        and board[row][column + 2] == piece and board[row][column + 3] == piece):
+                    return True
+
+        # check vertical locations for win
+        for column in range(num_columns):
+            for row in range(num_rows - 3):
+                if (board[row][column] == piece and board[row + 1][column] == piece
+                        and board[row + 2][column] == piece and board[row + 3][column] == piece):
+                    return True
+
+        # check positively sloped diagonals
+        for column in range(num_columns - 3):
+            for row in range(num_rows - 3):
+                if (board[row][column] == piece and board[row + 1][column + 1] == piece
+                        and board[row + 2][column + 2] == piece and board[row + 3][column + 3] == piece):
+                    return True
+
+        # check negatively sloped diagonals
+        for column in range(num_columns - 3):
+            for row in range(3, num_rows):
+                if (board[row][column] == piece and board[row - 1][column + 1] == piece
+                        and board[row - 2][column + 2] == piece and board[row - 3][column + 3] == piece):
+                    return True
+        return False
+
