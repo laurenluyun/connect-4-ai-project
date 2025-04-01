@@ -133,9 +133,9 @@ class Connect4:
                             self.screen.blit(winning_label, (40, 10))
                             self.game_over = True
 
-                    self.draw_board()
-                    self.turn += 1
-                    self.turn = self.turn % 2
+                        self.draw_board()
+                        self.turn += 1
+                        self.turn = self.turn % 2
 
                     # introduce a main menu
                     if self.game_over:
