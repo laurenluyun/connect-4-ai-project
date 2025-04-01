@@ -41,19 +41,35 @@ class Connect4Game:
         self.ALPHA = -math.inf
         self.BETA = math.inf
 
-        self.game_mode = self.get_game_mode()
+        self.game_mode = None
+        self.difficulty = None
 
     def create_board(self):
         return np.zeros((self.num_rows, self.num_columns))
 
     # generate a menu on the board
-    def get_game_mode(self):
+    def menu(self):
         """Ask the user to select the game mode."""
         while True:
             mode = input("Choose game mode: (1) Player vs. Player, (2) Player vs. AI: ")
             if mode in {"1", "2"}:
-                return "PvP" if mode == "1" else "PvAI"
-            print("Invalid choice. Enter 1 or 2.")
+                if mode == "1":
+                    self.game_mode = "PvP"
+                    break
+                else:
+                    self.game_mode = "PvAI"
+                    difficulty = input("Choose game difficulty: (1) Easy, (2) Hard: ")
+                    if difficulty in {"1", "2"}:
+                        if difficulty == "1":
+                            self.difficulty = "easy"
+                            break
+                        else:
+                            self.difficulty = "hard"
+                            break
+                    else:
+                        print("Invalid choice. Enter 1 or 2.")
+            else:
+                print("Invalid choice. Enter 1 or 2.")
 
     def draw_grid(self):
         for column in range(self.num_columns):
@@ -82,42 +98,12 @@ class Connect4Game:
         self.board[row][column] = piece
         self.draw_board()
 
-    def check_win(self, piece):
-        # check horizontal locations for win
-        for column in range(self.num_columns - 3):
-            for row in range(self.num_rows):
-                if (self.board[row][column] == piece and self.board[row][column + 1] == piece
-                        and self.board[row][column + 2] == piece and self.board[row][column + 3] == piece):
-                    return True
-
-        # check vertical locations for win
-        for column in range(self.num_columns):
-            for row in range(self.num_rows - 3):
-                if (self.board[row][column] == piece and self.board[row + 1][column] == piece
-                        and self.board[row + 2][column] == piece and self.board[row + 3][column] == piece):
-                    return True
-
-        # check positively sloped diagonals
-        for column in range(self.num_columns - 3):
-            for row in range(self.num_rows - 3):
-                if (self.board[row][column] == piece and self.board[row + 1][column + 1] == piece
-                        and self.board[row + 2][column + 2] == piece and self.board[row + 3][column + 3] == piece):
-                    return True
-
-        # check negatively sloped diagonals
-        for column in range(self.num_columns - 3):
-            for row in range(3, self.num_rows):
-                if (self.board[row][column] == piece and self.board[row - 1][column + 1] == piece
-                        and self.board[row - 2][column + 2] == piece and self.board[row - 3][column + 3] == piece):
-                    return True
-        return False
-
     # executes a move and checks for win
     def make_move(self, col, piece):
         if self.ai.is_valid_location(self.board, col):
             row = next(r for r in range(6) if self.board[r][col] == 0)
             self.drop_player_piece(row, col, piece)
-            if self.check_win(piece):
+            if self.ai.check_win(self.board, piece, self.num_columns, self.num_rows):
                 self.game_over = True
                 if piece == self.PLAYER_PIECE:
                     winning_label = self.screen_font.render(f"Player 1 wins!", 1, self.red)
@@ -127,9 +113,12 @@ class Connect4Game:
             return True
         return False
 
-    def ai_move(self):
-        # AI selects the best move
-        col, _ = self.ai.minimax(self.board, self.DEPTH, self.ALPHA, self.BETA, True)
+    def ai_move(self, difficulty):
+        if self.difficulty == 'easy':
+            # AI selects the best move
+            col, _ = self.ai.minimax(self.board, self.DEPTH, self.ALPHA, self.BETA, True)
+        else:
+            col = self.ai.monte_carlo_tree_search(self.board)
         # AI makes the move
         self.make_move(col, self.AI_PIECE)
 
@@ -138,7 +127,7 @@ class Connect4Game:
             # If it's AI's turn, make the move automatically
             if self.game_mode == "PvAI" and self.turn == 1 and not self.game_over:
                 pygame.time.wait(500)  # Add a slight delay for realism
-                self.ai_move()
+                self.ai_move(self.difficulty)
                 self.turn = 0  # Switch back to player
                 self.draw_board()
                 if self.game_over:
@@ -173,4 +162,5 @@ class Connect4Game:
 # Start the game
 if __name__ == "__main__":
     game = Connect4Game()
+    game.menu()
     game.start_game()
