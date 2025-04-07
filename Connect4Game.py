@@ -4,7 +4,7 @@ import math
 import pygame
 import sys
 from AIAlgorithm import AIAlgorithm
-
+from Button import Button
 
 class Connect4Game:
     def __init__(self):
@@ -22,9 +22,9 @@ class Connect4Game:
         self.orange = (255, 145, 0)
         self.white = (255, 255, 255)
         self.gray = (196, 196, 196)
-
         self.blue = (0, 0, 255)
         self.black = (0, 0, 0)
+        self.green = (3, 155, 49)
 
         self.game_over = False
         self.turn = random.choice([0, 1])
@@ -35,7 +35,6 @@ class Connect4Game:
         self.screen_font = pygame.font.SysFont("monospace", 75)
         self.screen = pygame.display.set_mode(self.screen_dimensions)
         pygame.display.set_caption("Connect 4")
-        self.draw_board()
 
         self.PLAYER_PIECE = 1
         self.AI_PIECE = 2
@@ -50,29 +49,66 @@ class Connect4Game:
     def create_board(self):
         return np.zeros((self.num_rows, self.num_columns))
 
-    # generate a menu on the board
+    # generate a main menu on the screen
     def menu(self):
         """Ask the user to select the game mode."""
+        # while True:
+        #     mode = input("Choose game mode: (1) Player vs. Player, (2) Player vs. AI: ")
+        #     if mode in {"1", "2"}:
+        #         if mode == "1":
+        #             self.game_mode = "PvP"
+        #             break
+        #         else:
+        #             self.game_mode = "PvAI"
+        #             difficulty = input("Choose game difficulty: (1) Easy, (2) Hard: ")
+        #             if difficulty in {"1", "2"}:
+        #                 if difficulty == "1":
+        #                     self.difficulty = "easy"
+        #                     break
+        #                 else:
+        #                     self.difficulty = "hard"
+        #                     break
+        #             else:
+        #                 print("Invalid choice. Enter 1 or 2.")
+        #     else:
+        #         print("Invalid choice. Enter 1 or 2.")
+
         while True:
-            mode = input("Choose game mode: (1) Player vs. Player, (2) Player vs. AI: ")
-            if mode in {"1", "2"}:
-                if mode == "1":
-                    self.game_mode = "PvP"
-                    break
-                else:
-                    self.game_mode = "PvAI"
-                    difficulty = input("Choose game difficulty: (1) Easy, (2) Hard: ")
-                    if difficulty in {"1", "2"}:
-                        if difficulty == "1":
-                            self.difficulty = "easy"
-                            break
-                        else:
-                            self.difficulty = "hard"
-                            break
-                    else:
-                        print("Invalid choice. Enter 1 or 2.")
-            else:
-                print("Invalid choice. Enter 1 or 2.")
+            self.screen.fill(self.gray)
+            mouse_position = pygame.mouse.get_pos()
+            connect_4_text = self.screen_font.render(f"Connect 4", 1, self.blue)
+            self.screen.blit(connect_4_text, (self.screen_width / 4 - 20, 10))
+            main_menu_text = self.screen_font.render(f"Main Menu", 1, self.blue)
+            self.screen.blit(main_menu_text, (self.screen_width / 4 - 20, 100))
+            play_button = Button(position=(self.screen_width / 2, 300), text_input="Play", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
+            quit_button = Button(position=(self.screen_width / 2, 500), text_input="Quit", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
+
+            for button in [play_button, quit_button]:
+                button.change_button_color(mouse_position)
+                button.update_button(self.screen)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if play_button.check_for_button_input(mouse_position):
+                        print()
+                        # self.start_game()
+                    if quit_button.check_for_button_input(mouse_position):
+                        pygame.quit()
+                        sys.exit()
+
+            pygame.display.update()
+
+
+    # creating play screen to choose between 1 player and 2 player options
+    def one_player_or_two_player_menu(self):
+        print()
+
+    # creating 1 player screen to choose between easy, medium, hard mode AI
+    def choose_difficulty_level_menu(self):
+        print()
 
     def draw_grid(self):
         for column in range(self.num_columns):
@@ -126,6 +162,7 @@ class Connect4Game:
         self.make_move(col, self.AI_PIECE)
 
     def start_game(self):
+        self.draw_board()
         while not self.game_over:
             # If it's AI's turn, make the move automatically
             if self.game_mode == "PvAI" and self.turn == 1 and not self.game_over:
