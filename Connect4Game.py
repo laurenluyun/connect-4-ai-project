@@ -132,7 +132,6 @@ class Connect4Game:
                                  base_color=self.blue, hovering_color=self.green)
             back_button = Button(position=(self.screen_width / 2, 650), text_input="Back", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
 
-
             for button in [easy_mode_button, medium_mode_button,hard_mode_button, back_button]:
                 button.change_button_color(mouse_position)
                 button.update_button(self.screen)
@@ -212,6 +211,40 @@ class Connect4Game:
         self.game_over = False
         self.board = self.create_board()
 
+    def restart_screen(self):
+        while True:
+            self.screen.fill(self.gray)
+            mouse_position = pygame.mouse.get_pos()
+            play_again_button = Button(position=(self.screen_width / 2, 200), text_input="Play Again",
+                                          font=self.screen_font, base_color=self.blue, hovering_color=self.green)
+            main_menu_button = Button(position=(self.screen_width / 2, 350), text_input="Main Menu",
+                                        font=self.screen_font, base_color=self.blue, hovering_color=self.green)
+            quit_button = Button(position=(self.screen_width / 2, 500), text_input="Quit", font=self.screen_font,
+                                 base_color=self.blue, hovering_color=self.green)
+
+            for button in [play_again_button, main_menu_button, quit_button]:
+                button.change_button_color(mouse_position)
+                button.update_button(self.screen)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if play_again_button.check_for_button_input(mouse_position):
+                        self.reset_game()
+                        self.screen.fill(self.white)
+                        self.draw_board()
+                        self.turn = random.choice([0, 1])
+                        return
+                    if main_menu_button.check_for_button_input(mouse_position):
+                        return
+                    if quit_button.check_for_button_input(mouse_position):
+                        pygame.quit()
+                        sys.exit()
+
+            pygame.display.update()
+
     def start_game(self):
         self.reset_game()
         self.screen.fill(self.white)
@@ -225,6 +258,9 @@ class Connect4Game:
                 self.draw_board()
                 if self.game_over:
                     pygame.time.wait(4000)
+                    self.restart_screen()
+                    if self.game_over:
+                        return
 
             else:
                 for event in pygame.event.get():
@@ -250,7 +286,9 @@ class Connect4Game:
                         self.draw_board()
                         if self.game_over:
                             pygame.time.wait(4000)
-                            return
+                            self.restart_screen()
+                            if self.game_over:
+                                return
 
 
 
