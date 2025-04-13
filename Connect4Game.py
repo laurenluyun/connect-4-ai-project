@@ -40,7 +40,7 @@ class Connect4Game:
         self.PLAYER_PIECE = 1
         self.AI_PIECE = 2
         self.ai = AIAlgorithm(self.AI_PIECE, self.PLAYER_PIECE)
-        self.DEPTH = 5
+        self.DEPTH = 3
         self.ALPHA = -math.inf
         self.BETA = math.inf
 
@@ -146,7 +146,10 @@ class Connect4Game:
                         self.start_game()
                         return
                     if medium_mode_button.check_for_button_input(mouse_position):
-                        print()
+                        # print()
+                        self.difficulty = "medium"
+                        self.start_game()
+                        return
                     if hard_mode_button.check_for_button_input(mouse_position):
                         self.difficulty = "hard"
                         self.start_game()
@@ -199,11 +202,28 @@ class Connect4Game:
         return False
 
     def ai_move(self):
+        # First check if there are any valid moves
+        valid_moves = self.ai.get_valid_locations(self.board)
+        if not valid_moves:
+            # No valid moves - game should be over
+            self.game_over = True
+            return False
+
         if self.difficulty == 'easy':
-            # AI selects the best move
+            # easy mode: random move selection
+            col = self.ai.random_move(self.board)
+        elif self.difficulty == "medium":
+            # medium mode: minmax with alpha-beta pruning
             col, _ = self.ai.minimax(self.board, self.DEPTH, self.ALPHA, self.BETA, True)
         else:
+            # hard mode: monte carlo tree search
             col = self.ai.monte_carlo_tree_search(self.board)
+
+        # Check if we got a valid column
+        if col == -1 or col not in valid_moves:
+            # Something went wrong, just pick the first valid move
+            col = valid_moves[0] if valid_moves else 0
+
         # AI makes the move
         self.make_move(col, self.AI_PIECE)
 
