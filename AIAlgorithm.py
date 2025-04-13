@@ -71,27 +71,89 @@ class AIAlgorithm:
                     break
             return best_col, value
 
-    def monte_carlo_tree_search(self, board, simulations=1000):
+    def monte_carlo_tree_search(self, board, simulations=500):
         '''
         MCTS for AI decision-making in hard mode, simulating 'simulations' number of random games
-        for each valid move. The move with the highest win count for AI is chosen
-        :param board:
-        :param simulations:
+        for each valid move. The move with the highest win count for AI is chosen.
+        - reduce default simulation count for better performance
+        - add early termination for clearly winning/losing positions
+        - add weighting to favor center positions
+        :param board: current game board
+        :param simulations: number of random games to simulate per move
         :return: the best column to play based on MCTS simulation results
         '''
         valid_moves = self.get_valid_locations(board)
+        if not valid_moves:
+            return -1  # No valid moves
+
+        # Quick check for immediate winning move
+        for col in valid_moves:
+            row = next(r for r in range(6) if board[r][col] == 0)
+            temp_board = copy.deepcopy(board)
+            self.drop_piece(temp_board, row, col, self.AI_PIECE)
+            if self.check_win(temp_board, self.AI_PIECE, self.num_columns, self.num_rows):
+                # Return winning move immediately
+                return col
+
+        # Quick check for immediate blocking move
+        for col in valid_moves:
+            row = next(r for r in range(6) if board[r][col] == 0)
+            temp_board = copy.deepcopy(board)
+            self.drop_piece(temp_board, row, col, self.PLAYER_PIECE)
+            if self.check_win(temp_board, self.PLAYER_PIECE, self.num_columns, self.num_rows):
+                # Block opponent's winning move
+                return col
+
+        # Center column preference weight
+        center_weight = 2 if 3 in valid_moves else 1
         move_scores = {col: 0 for col in valid_moves}
+        move_simulations = {col: 0 for col in valid_moves}
+
+        # Give initial bias to center columns
+        if 3 in move_scores:
+            # Small bias for center column
+            move_scores[3] += 0.5
+
+        # Track best move
+        best_score = -1
+        early_stop_threshold = simulations // 4  # 25% of total simulations
 
         # run simulations for each valid move
         for col in valid_moves:
+            wins = 0
             for _ in range(simulations):
                 sim_board = copy.deepcopy(board)
                 row = next(r for r in range(6) if sim_board[r][col] == 0)
                 self.drop_piece(sim_board, row, col, self.AI_PIECE)
                 # simulate a random game from this position
                 if self.simulate_random_game(sim_board):
-                    move_scores[col] += 1
-        # return the column with the highest simulation win rate
+                    wins += 1
+
+                move_simulations[col] = _ + 1
+                current_win_rate = wins / (_ + 1)
+
+                # Apply center column preference
+                if col == 3:
+                    move_scores[col] = current_win_rate * center_weight
+                else:
+                    move_scores[col] = current_win_rate
+
+                # Early termination checks
+                if _ > early_stop_threshold:
+                    if current_win_rate > best_score:
+                        best_score = current_win_rate
+                    # If we're significantly behind the best move, stop simulating this move
+                    elif current_win_rate < best_score - 0.3:
+                        break
+
+        # For moves that didn't complete all simulations, adjust scores
+        for col in valid_moves:
+            if move_simulations[col] < simulations:
+                # Penalize slightly for incomplete simulation (uncertainty)
+                confidence_factor = move_simulations[col] / simulations
+                move_scores[col] *= confidence_factor
+
+        # Return the column with the highest score
         return max(move_scores, key=move_scores.get)
 
     def simulate_random_game(self, board):
@@ -151,4 +213,16 @@ class AIAlgorithm:
                         and board[row - 2][column + 2] == piece and board[row - 3][column + 3] == piece):
                     return True
         return False
+
+    def random_move(self, board):
+        """
+        Selects a random valid move for easy difficulty
+        """
+        valid_locations = self.get_valid_locations(board)
+        if not valid_locations:
+            # The board is full or the game is over
+            return -1  # Invalid column to indicate no move is possible
+
+            # Return a random valid column
+        return random.choice(valid_locations)
 
