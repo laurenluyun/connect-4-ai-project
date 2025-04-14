@@ -26,10 +26,13 @@ class Connect4Game:
         self.black = (0, 0, 0)
         self.green = (3, 155, 49)
 
+        # initialize game state
         self.game_over = False
         self.turn = random.choice([0, 1])
         self.turn = 0
         self.board = self.create_board()
+        self.game_mode = None
+        self.difficulty = None
 
         # initialize graphical interface
         pygame.init()
@@ -37,6 +40,7 @@ class Connect4Game:
         self.screen = pygame.display.set_mode(self.screen_dimensions)
         pygame.display.set_caption("Connect 4")
 
+        # AI constants for AIAlgorithm
         self.PLAYER_PIECE = 1
         self.AI_PIECE = 2
         self.ai = AIAlgorithm(self.AI_PIECE, self.PLAYER_PIECE)
@@ -44,10 +48,10 @@ class Connect4Game:
         self.ALPHA = -math.inf
         self.BETA = math.inf
 
-        self.game_mode = None
-        self.difficulty = None
-
     def create_board(self):
+        """
+        Creates a board full of zeros for Connect 4 game
+        """
         return np.zeros((self.num_rows, self.num_columns))
 
     # generate a main menu on the screen
@@ -57,8 +61,9 @@ class Connect4Game:
             self.reset_game()
             self.game_mode = None
             self.difficulty = None
+
+            # create main menu screen
             self.screen.fill(self.gray)
-            mouse_position = pygame.mouse.get_pos()
             connect_4_text = self.screen_font.render(f"Connect 4", 1, self.blue)
             self.screen.blit(connect_4_text, (self.screen_width / 4 - 20, 60))
             main_menu_text = self.screen_font.render(f"Main Menu", 1, self.blue)
@@ -66,6 +71,9 @@ class Connect4Game:
             play_button = Button(position=(self.screen_width / 2, 350), text_input="Play", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
             quit_button = Button(position=(self.screen_width / 2, 550), text_input="Quit", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
 
+            mouse_position = pygame.mouse.get_pos() # tracking mouse position in main menu
+
+            # this highlights button that mouse is currently on
             for button in [play_button, quit_button]:
                 button.change_button_color(mouse_position)
                 button.update_button(self.screen)
@@ -75,24 +83,28 @@ class Connect4Game:
                     pygame.quit()
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if play_button.check_for_button_input(mouse_position):
+                    if play_button.check_for_button_input(mouse_position):  # click play button goes to single or two player mode screen
                         self.one_player_or_two_player_menu()
-                    if quit_button.check_for_button_input(mouse_position):
+                    if quit_button.check_for_button_input(mouse_position):  # click quit closes program
                         pygame.quit()
                         sys.exit()
 
             pygame.display.update()
 
-
-    # creating play screen to choose between 1 player and 2 player options
     def one_player_or_two_player_menu(self):
+        """
+        Creating play screen to choose between 1 player and 2 players options
+        """
         while True:
+            # creating game mode selection screen
             self.screen.fill(self.gray)
-            mouse_position = pygame.mouse.get_pos()
             single_player_button = Button(position=(self.screen_width / 2, 150), text_input="1 Player", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
             two_players_button = Button(position=(self.screen_width / 2, 350), text_input="2 Players", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
             back_button = Button(position=(self.screen_width / 2, 550), text_input="Back", font=self.screen_font, base_color=self.blue, hovering_color=self.green)
 
+            mouse_position = pygame.mouse.get_pos() # tracking mouse position in game mode menu
+
+            # this highlights button that mouse is currently on
             for button in [single_player_button, two_players_button, back_button]:
                 button.change_button_color(mouse_position)
                 button.update_button(self.screen)
@@ -230,6 +242,7 @@ class Connect4Game:
     def reset_game(self):
         self.game_over = False
         self.board = self.create_board()
+        self.ai.winning_pieces = []
 
     def restart_screen(self):
         while True:
@@ -305,6 +318,15 @@ class Connect4Game:
                             self.turn = 1 - self.turn  # Switch player
                         self.draw_board()
                         if self.game_over:
+                            print(self.ai.winning_pieces)
+                            for i in range(4):
+                                piece_center_coordinates = ((self.ai.winning_pieces[i][1] + 0.5) * self.square_size,
+                                                            self.screen_width - (self.ai.winning_pieces[i][0] + 0.5) * self.square_size)
+                                triangle_coordinate_list = [(piece_center_coordinates[0], piece_center_coordinates[1] - self.circle_radius),
+                                                        (piece_center_coordinates[0] + int(self.circle_radius * math.sin(math.radians(45))), piece_center_coordinates[1] + int(self.circle_radius * math.sin(math.radians(45)))),
+                                                        (piece_center_coordinates[0] - int(self.circle_radius * math.sin(math.radians(45))), piece_center_coordinates[1] + int(self.circle_radius * math.sin(math.radians(45))))]
+                                pygame.draw.polygon(surface=self.screen, color=self.green, points=triangle_coordinate_list)
+                            pygame.display.update()
                             pygame.time.wait(4000)
                             self.restart_screen()
                             if self.game_over:
