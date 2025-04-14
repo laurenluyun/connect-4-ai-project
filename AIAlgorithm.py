@@ -14,6 +14,7 @@ class AIAlgorithm:
         self.num_rows = 6
         self.num_columns = 7
         self.winning_pieces = []
+        self.game_over = False
 
     def is_valid_location(self, board, col):
         # A column is valid if the top row (row index 5) is empty
@@ -294,10 +295,11 @@ class AIAlgorithm:
             for row in range(num_rows):
                 if (board[row][column] == piece and board[row][column + 1] == piece
                         and board[row][column + 2] == piece and board[row][column + 3] == piece):
-                    self.winning_pieces.append([row, column])
-                    self.winning_pieces.append([row, column + 1])
-                    self.winning_pieces.append([row, column + 2])
-                    self.winning_pieces.append([row, column + 3])
+                    if self.game_over:
+                        self.winning_pieces.append([row, column])
+                        self.winning_pieces.append([row, column + 1])
+                        self.winning_pieces.append([row, column + 2])
+                        self.winning_pieces.append([row, column + 3])
                     return True
 
         # check vertical locations for win
@@ -305,10 +307,11 @@ class AIAlgorithm:
             for row in range(num_rows - 3):
                 if (board[row][column] == piece and board[row + 1][column] == piece
                         and board[row + 2][column] == piece and board[row + 3][column] == piece):
-                    self.winning_pieces.append([row, column])
-                    self.winning_pieces.append([row + 1, column])
-                    self.winning_pieces.append([row + 2, column])
-                    self.winning_pieces.append([row + 3, column])
+                    if self.game_over:
+                        self.winning_pieces.append([row, column])
+                        self.winning_pieces.append([row + 1, column])
+                        self.winning_pieces.append([row + 2, column])
+                        self.winning_pieces.append([row + 3, column])
                     return True
 
         # check positively sloped diagonals
@@ -316,10 +319,11 @@ class AIAlgorithm:
             for row in range(num_rows - 3):
                 if (board[row][column] == piece and board[row + 1][column + 1] == piece
                         and board[row + 2][column + 2] == piece and board[row + 3][column + 3] == piece):
-                    self.winning_pieces.append([row, column])
-                    self.winning_pieces.append([row + 1, column + 1])
-                    self.winning_pieces.append([row + 2, column + 2])
-                    self.winning_pieces.append([row + 3, column + 3])
+                    if self.game_over:
+                        self.winning_pieces.append([row, column])
+                        self.winning_pieces.append([row + 1, column + 1])
+                        self.winning_pieces.append([row + 2, column + 2])
+                        self.winning_pieces.append([row + 3, column + 3])
                     return True
 
         # check negatively sloped diagonals
@@ -327,10 +331,11 @@ class AIAlgorithm:
             for row in range(3, num_rows):
                 if (board[row][column] == piece and board[row - 1][column + 1] == piece
                         and board[row - 2][column + 2] == piece and board[row - 3][column + 3] == piece):
-                    self.winning_pieces.append([row, column])
-                    self.winning_pieces.append([row - 1, column + 1])
-                    self.winning_pieces.append([row - 2, column + 2])
-                    self.winning_pieces.append([row - 3, column + 3])
+                    if self.game_over:
+                        self.winning_pieces.append([row, column])
+                        self.winning_pieces.append([row - 1, column + 1])
+                        self.winning_pieces.append([row - 2, column + 2])
+                        self.winning_pieces.append([row - 3, column + 3])
                     return True
         return False
 
