@@ -44,7 +44,7 @@ class Connect4Game:
         self.PLAYER_PIECE = 1
         self.AI_PIECE = 2
         self.ai = AIAlgorithm(self.AI_PIECE, self.PLAYER_PIECE)
-        self.DEPTH = 2
+        self.DEPTH = 3
         self.ALPHA = -math.inf
         self.BETA = math.inf
 

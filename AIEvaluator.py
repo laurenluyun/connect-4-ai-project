@@ -13,6 +13,7 @@ class AIEvaluator:
         self.AIAlgorithm = ai_algorithm_class
         self.num_rows = 6
         self.num_columns = 7
+        self.DEPTH = 3
         # track wins/losses/draws
         self.stats = {
             "random_vs_minimax": {"random_wins": 0, "minimax_wins": 0, "draws": 0, "total_games": 0},
@@ -44,7 +45,7 @@ class AIEvaluator:
         if algorithm_type == "random":
             col = ai_instance.random_move(board)
         elif algorithm_type == "minimax":
-            col, _ = ai_instance.minimax(board, 3, -math.inf, math.inf, True)
+            col, _ = ai_instance.minimax(board, self.DEPTH, -math.inf, math.inf, True)
         elif algorithm_type == "mcts":
             col = ai_instance.monte_carlo_tree_search(board)
 
