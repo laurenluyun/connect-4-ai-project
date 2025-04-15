@@ -2,7 +2,6 @@ import random
 import math
 import copy
 
-
 class AIAlgorithm:
     def __init__(self, ai_piece, player_piece):
         # AI's piece identifier (typically 2)
@@ -75,20 +74,24 @@ class AIAlgorithm:
 
         # Count pieces
         piece_count = window.count(piece)
-        empty_count = window.count(self.EMPTY)
-        opponent_count = window.count(opponent_piece)
+        # empty_count = window.count(self.EMPTY)
+        # opponent_count = window.count(opponent_piece)
 
         # Score window based on piece counts
         if piece_count == 4:
             score += 100  # Winning position
-        elif piece_count == 3 and empty_count == 1:
-            score += 5  # Potential win next move
-        elif piece_count == 2 and empty_count == 2:
-            score += 2  # Developing position
+        # elif piece_count == 3 and empty_count == 1:
+        #     score += 5  # Potential win next move
+        elif piece_count == 3:
+            score += 3
+        # elif piece_count == 2 and empty_count == 2:
+        #     score += 2  # Developing position
+        elif piece_count == 2:
+            score += 1
 
         # Penalize opponent's potential wins
-        if opponent_count == 3 and empty_count == 1:
-            score -= 4  # Block opponent's potential win
+        # if opponent_count == 3 and empty_count == 1:
+        #     score -= 4  # Block opponent's potential win
 
         return score
 
@@ -145,7 +148,11 @@ class AIAlgorithm:
                 new_score = self.minimax(temp_board, depth - 1, alpha, beta, False)[1]
 
                 # update if better move is found
-                if new_score > value:
+                # if new_score > value:
+                #     value, best_col = new_score, col
+
+                # introduce randomness to decisions
+                if new_score > value or (new_score == value and random.random() < 0.3):
                     value, best_col = new_score, col
 
                 # alpha-beta pruning
