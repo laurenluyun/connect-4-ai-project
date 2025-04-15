@@ -15,9 +15,7 @@ This Connect Four implementation offers both Player vs Player (PvP) and Player v
 - Clean graphical interface built with Pygame
 - Multiple game modes (PvP, PvAI)
 - Three AI difficulty levels
-- Score tracking
 - Win detection with visual highlighting
-- Game statistics
 - Interactive menus for game setup
 
 ## Requirements
@@ -55,7 +53,6 @@ The medium AI uses the minimax algorithm with alpha-beta pruning to look ahead s
 - Sophisticated position evaluation
 - Effective pruning to improve computational efficiency
 - Prioritization of center control and connected pieces
-- Balance between offensive and defensive play
 
 ### Monte Carlo Tree Search (Hard)
 The hard AI uses Monte Carlo Tree Search, simulating hundreds of random games from each possible move to determine the statistically best option. It features:
