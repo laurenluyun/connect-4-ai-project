@@ -2,7 +2,6 @@ import random
 import math
 import copy
 
-
 class AIAlgorithm:
     def __init__(self, ai_piece, player_piece):
         # AI's piece identifier (typically 2)
